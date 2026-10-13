@@ -8,10 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app.config import settings
-from app.database import Base, SessionLocal, engine, ensure_schema, install_guards
+from app.core.config import settings
+from app.core.database import Base, SessionLocal, engine, ensure_schema, install_guards
 from app.routers import audit, auth, offers, policy, recruitment, reports, students, users
-from app.seed import seed
+from app.persistence.seed import seed
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("placement")
@@ -19,7 +19,7 @@ logger = logging.getLogger("placement")
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    import app.models  # noqa: F401
+    import app.persistence.models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
     ensure_schema()

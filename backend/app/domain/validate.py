@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from decimal import Decimal, ROUND_HALF_UP
 
-from app.domain import COURSES
+from app.domain.catalog import COURSES
 
 
 def clean_placement_id(value: str) -> str:

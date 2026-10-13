@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { ApiError, api, formatNumber, todayInput } from "../api";
-import { useAuth } from "../auth";
-import type { Drive, Evaluation, Offer, Standing, Student } from "../types";
-import { Banner, Checks, Pill, toneFor } from "../ui";
+import { ApiError, api, formatNumber, todayInput } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Drive, Evaluation, Offer, Standing, Student } from "../lib/types";
+import { Banner, Checks, Pill, toneFor } from "../components/ui";
 
 interface Detail {
   student: Student;

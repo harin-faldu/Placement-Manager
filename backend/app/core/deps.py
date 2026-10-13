@@ -6,12 +6,12 @@ from fastapi import Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.clock import utcnow
-from app.config import settings
-from app.database import get_db
-from app.http import fail
-from app.models import User, UserSession
-from app.security import hash_token
+from app.core.clock import utcnow
+from app.core.config import settings
+from app.core.database import get_db
+from app.core.http import fail
+from app.persistence.models import User, UserSession
+from app.core.security import hash_token
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:

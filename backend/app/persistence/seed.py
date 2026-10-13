@@ -1,21 +1,30 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.audit import write_audit
-from app.clock import today_ist, utcnow
-from app.domain import COURSES, DEFAULT_CONFIG
-from app.models import Attendance, Company, ComplianceFlag, Drive, Offer, PolicyConfig, Student, User
-from app.policy import acceptance_window, placement_status_of
-from app.security import encrypt_mobile, hash_password, mobile_digest
-from app.services import offer_snap
-from app.validate import clean_mobile
+from app.persistence.audit import write_audit
+from app.core.clock import today_ist, utcnow
+from app.domain.catalog import COURSES, DEFAULT_CONFIG
+from app.persistence.models import Attendance, Company, ComplianceFlag, Drive, Offer, PolicyConfig, Student, User
+from app.domain.policy import acceptance_window, placement_status_of
+from app.core.security import encrypt_mobile, hash_password, mobile_digest
+from app.services.placement import offer_snap
+from app.domain.validate import clean_mobile
 
 ALL_COURSES = [course["code"] for course in COURSES]
+
+
+def account_password(role: str) -> str:
+    key = f"{role}_PASSWORD"
+    value = os.getenv(key, "").strip()
+    if not value:
+        raise RuntimeError(f"{key} is not set. Add it to .env.")
+    return value
 
 
 def seed(db: Session) -> None:
@@ -113,33 +122,33 @@ def seed(db: Session) -> None:
 
     officer = User(
         email="officer@nfsu.ac.in",
-        password_hash=hash_password("Officer@2026!"),
+        password_hash=hash_password(account_password("OFFICER")),
         full_name="Rahul Banerjee",
         role="officer",
     )
     admin = User(
         email="admin@nfsu.ac.in",
-        password_hash=hash_password("Admin@2026!"),
+        password_hash=hash_password(account_password("ADMIN")),
         full_name="Aditi Sharma",
         role="admin",
     )
     coordinator = User(
         email="coord.cs@nfsu.ac.in",
-        password_hash=hash_password("Coord@2026!"),
+        password_hash=hash_password(account_password("COORDINATOR")),
         full_name="Kavita Rao",
         role="coordinator",
         course="MTECH_CS",
     )
     recruiter = User(
         email="recruiter@kavach.example",
-        password_hash=hash_password("Recruit@2026!"),
+        password_hash=hash_password(account_password("RECRUITER")),
         full_name="Neha Kulkarni",
         role="recruiter",
         company_id=companies["Kavach Security"].id,
     )
     student_user = User(
         email="ananya.shah@nfsu.ac.in",
-        password_hash=hash_password("Student@2026!"),
+        password_hash=hash_password(account_password("STUDENT")),
         full_name="Ananya Shah",
         role="student",
         student_id=students["NFSU-2026-007"].id,

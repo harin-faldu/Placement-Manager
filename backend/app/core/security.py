@@ -7,7 +7,7 @@ import secrets
 import bcrypt
 from cryptography.fernet import Fernet, InvalidToken
 
-from app.config import settings
+from app.core.config import settings
 
 _fernet = Fernet(settings.fernet_key.encode() if isinstance(settings.fernet_key, str) else settings.fernet_key)
 

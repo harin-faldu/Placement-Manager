@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ApiError, api, formatNumber } from "../api";
-import { Banner, Pill } from "../ui";
+import { ApiError, api, formatNumber } from "../lib/api";
+import { Banner, Pill } from "../components/ui";
 
 interface ExceptionItem {
   id: string;

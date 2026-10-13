@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.config import settings
+from app.core.config import settings
 
 
 class Base(DeclarativeBase):

@@ -7,16 +7,16 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.audit import write_audit
-from app.clock import utcnow
-from app.config import settings
-from app.database import get_db
-from app.deps import get_current_user
-from app.http import client_ip, fail
-from app.models import LoginAttempt, MfaChallenge, User, UserSession
-from app.schemas import LoginRequest, MfaConfirm, MfaRequest
-from app.security import hash_token, new_token, verify_password
-from app.services import audit, user_public
+from app.persistence.audit import write_audit
+from app.core.clock import utcnow
+from app.core.config import settings
+from app.core.database import get_db
+from app.core.deps import get_current_user
+from app.core.http import client_ip, fail
+from app.persistence.models import LoginAttempt, MfaChallenge, User, UserSession
+from app.persistence.schemas import LoginRequest, MfaConfirm, MfaRequest
+from app.core.security import hash_token, new_token, verify_password
+from app.services.placement import audit, user_public
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

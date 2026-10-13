@@ -7,14 +7,14 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.deps import require
-from app.domain import course_short
-from app.http import client_ip, conflict, fail
-from app.models import Application, Attendance, Company, Drive, ExclusionCharge, Student, User
-from app.policy import evaluate
-from app.schemas import ApplicationCreate, AttendanceCreate, AttendanceReview, CompanyCreate, DriveCreate
-from app.services import (
+from app.core.database import get_db
+from app.core.deps import require
+from app.domain.catalog import course_short
+from app.core.http import client_ip, conflict, fail
+from app.persistence.models import Application, Attendance, Company, Drive, ExclusionCharge, Student, User
+from app.domain.policy import evaluate
+from app.persistence.schemas import ApplicationCreate, AttendanceCreate, AttendanceReview, CompanyCreate, DriveCreate
+from app.services.placement import (
     attendance_dict,
     audit,
     classify_drive,
@@ -28,7 +28,7 @@ from app.services import (
     student_snap,
     validate_package,
 )
-from app.validate import round_money
+from app.domain.validate import round_money
 
 router = APIRouter(prefix="/api", tags=["recruitment"])
 

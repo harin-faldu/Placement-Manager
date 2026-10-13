@@ -10,14 +10,14 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.deps import require
-from app.domain import COURSES
-from app.http import client_ip, conflict, fail
-from app.models import Attendance, Drive, Offer, Student, User
-from app.schemas import ExclusionUpdate, StudentCreate, StudentUpdate
-from app.security import encrypt_mobile, mobile_digest
-from app.services import (
+from app.core.database import get_db
+from app.core.deps import require
+from app.domain.catalog import COURSES
+from app.core.http import client_ip, conflict, fail
+from app.persistence.models import Attendance, Drive, Offer, Student, User
+from app.persistence.schemas import ExclusionUpdate, StudentCreate, StudentUpdate
+from app.core.security import encrypt_mobile, mobile_digest
+from app.services.placement import (
     attendance_dict,
     audit,
     can_read_student,
@@ -31,7 +31,7 @@ from app.services import (
     standing_for,
     student_dict,
 )
-from app.validate import like_contains
+from app.domain.validate import like_contains
 
 router = APIRouter(prefix="/api", tags=["students"])
 
@@ -220,7 +220,7 @@ def archive_student(
     student = _load(db, user, student_id)
     if student.archived_at is not None:
         fail(409, "This record is already archived")
-    from app.clock import utcnow
+    from app.core.clock import utcnow
 
     before = profile_snapshot(student, reveal_contact=False)
     student.archived_at = utcnow()

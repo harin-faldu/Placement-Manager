@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.deps import require
-from app.domain import course_name
-from app.http import client_ip, fail
-from app.models import Company, Drive, Student, User
-from app.services import audit, classify_drive, collect_report_inputs, drive_dict, expire_due_offers, load_config
-from app.stats import summarize
+from app.core.database import get_db
+from app.core.deps import require
+from app.domain.catalog import course_name
+from app.core.http import client_ip, fail
+from app.persistence.models import Company, Drive, Student, User
+from app.services.placement import audit, classify_drive, collect_report_inputs, drive_dict, expire_due_offers, load_config
+from app.domain.stats import summarize
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 

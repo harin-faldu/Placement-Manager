@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from app.validate import clean_batch, clean_email, clean_mobile, clean_name, clean_placement_id, clean_text, resolve_course
+from app.domain.validate import clean_batch, clean_email, clean_mobile, clean_name, clean_placement_id, clean_text, resolve_course
 
 
 class LoginRequest(BaseModel):

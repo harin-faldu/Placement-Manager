@@ -31,7 +31,7 @@ Placement status, category, and package statistics are derived. Clients cannot s
 | Export | Role-scoped, audited, not cached |
 | Browser | Content Security Policy, frame denial, nosniff, and a required `X-Requested-With` header on changes |
 
-The development key and password are in `docker-compose.yml` so the prototype starts without extra setup. Replace `SECRET_KEY`, `FERNET_KEY`, the database password, and the seeded passwords before any real data is stored. Put TLS in front of port 8090 and set `COOKIE_SECURE=true`.
+Secrets are read from `.env`. Replace `SECRET_KEY`, `FERNET_KEY`, the database password, and the seeded passwords before any real data is stored. Put TLS in front of port 8090 and set `COOKIE_SECURE=true`.
 
 ## Backup
 

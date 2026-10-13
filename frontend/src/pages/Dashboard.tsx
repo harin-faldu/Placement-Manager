@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, formatNumber } from "../api";
-import { useAuth } from "../auth";
-import type { Offer, Overview, Standing, Student } from "../types";
-import { Pill, toneFor } from "../ui";
+import { api, formatNumber } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Offer, Overview, Standing, Student } from "../lib/types";
+import { Pill, toneFor } from "../components/ui";
 
 export function Dashboard() {
   const { user } = useAuth();

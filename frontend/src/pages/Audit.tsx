@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
-import { Banner, Pill } from "../ui";
+import { api } from "../lib/api";
+import { Banner, Pill } from "../components/ui";
 
 interface AuditRow {
   id: number;

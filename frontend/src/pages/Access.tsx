@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
-import { ApiError, api } from "../api";
-import { useAuth } from "../auth";
-import type { Company, Course, User } from "../types";
-import { Banner, Pill } from "../ui";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Company, Course, User } from "../lib/types";
+import { Banner, Pill } from "../components/ui";
 
 export function AccessPage() {
   const { user } = useAuth();

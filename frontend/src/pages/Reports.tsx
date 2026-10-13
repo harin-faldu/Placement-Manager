@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { api, download, formatNumber } from "../api";
-import { useAuth } from "../auth";
-import type { Overview } from "../types";
-import { Banner } from "../ui";
+import { api, download, formatNumber } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Overview } from "../lib/types";
+import { Banner } from "../components/ui";
 
 export function Reports() {
   const { user } = useAuth();

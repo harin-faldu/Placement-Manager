@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.audit import verify_chain
-from app.database import get_db
-from app.deps import require
-from app.models import AuditLog, User
-from app.services import public_audit
+from app.persistence.audit import verify_chain
+from app.core.database import get_db
+from app.core.deps import require
+from app.persistence.models import AuditLog, User
+from app.services.placement import public_audit
 
 router = APIRouter(prefix="/api/audit", tags=["audit"])
 

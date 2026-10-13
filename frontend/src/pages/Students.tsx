@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiError, api } from "../api";
-import { useAuth } from "../auth";
-import type { Course, Student } from "../types";
-import { Banner, Pill, toneFor } from "../ui";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Course, Student } from "../lib/types";
+import { Banner, Pill, toneFor } from "../components/ui";
 
 const EMPTY = {
   placement_id: "",

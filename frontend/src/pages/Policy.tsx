@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
-import { ApiError, api } from "../api";
-import { useAuth } from "../auth";
-import type { Drive, Evaluation, Student } from "../types";
-import { Banner, Checks, StudentPicker } from "../ui";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Drive, Evaluation, Student } from "../lib/types";
+import { Banner, Checks, StudentPicker } from "../components/ui";
 
 interface PolicyPayload {
   narrative: string[];

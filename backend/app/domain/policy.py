@@ -4,7 +4,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from zoneinfo import ZoneInfo
 
-from app.domain import (
+from app.domain.catalog import (
     PLACEMENT_LABELS,
     Check,
     DriveSnap,

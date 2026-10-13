@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ApiError, api } from "../api";
-import { useAuth } from "../auth";
-import type { Company, Course, Drive, Student } from "../types";
-import { Banner, Pill, StudentPicker } from "../ui";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Company, Course, Drive, Student } from "../lib/types";
+import { Banner, Pill, StudentPicker } from "../components/ui";
 
 export function Recruitment() {
   const { user } = useAuth();

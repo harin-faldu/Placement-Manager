@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 
-from app.domain import COURSES, FlagSnap, OfferSnap, StudentSnap, course_name, course_short
-from app.policy import category_for, further_paths, governing_ctc, placement_status_of
+from app.domain.catalog import COURSES, FlagSnap, OfferSnap, StudentSnap, course_name, course_short
+from app.domain.policy import category_for, further_paths, governing_ctc, placement_status_of
 
 DEFINITIONS = {
     "registered": "Students whose placement registration is Registered. Archived records are excluded.",

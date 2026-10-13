@@ -5,9 +5,9 @@ import json
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.audit import write_audit
-from app.clock import utcnow
-from app.domain import (
+from app.persistence.audit import write_audit
+from app.core.clock import utcnow
+from app.domain.catalog import (
     DEFAULT_CONFIG,
     ELIGIBILITY_LABELS,
     OFFER_LABELS,
@@ -21,7 +21,7 @@ from app.domain import (
     course_name,
     course_short,
 )
-from app.models import (
+from app.persistence.models import (
     Attendance,
     AuditLog,
     Company,
@@ -33,9 +33,9 @@ from app.models import (
     Student,
     User,
 )
-from app.policy import category_for, evaluate, placement_status_of, standing
-from app.security import decrypt_mobile, mask_mobile
-from app.validate import round_money
+from app.domain.policy import category_for, evaluate, placement_status_of, standing
+from app.core.security import decrypt_mobile, mask_mobile
+from app.domain.validate import round_money
 
 
 def load_config(db: Session) -> dict:
@@ -325,7 +325,7 @@ def offer_snapshot(offer: Offer) -> dict:
 
 
 def validate_package(offer_type: str, ctc: float | None, stipend: float | None, period: str | None) -> None:
-    from app.http import fail
+    from app.core.http import fail
 
     if offer_type == "I":
         if stipend is None or stipend < 0:

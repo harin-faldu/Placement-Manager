@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Outlet, useNavigate } from "react-router-dom";
-import { api } from "./api";
-import { useAuth } from "./auth";
-import type { Check, Role, Student } from "./types";
+import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { Check, Role, Student } from "../lib/types";
 
 const NAV: Array<{ to: string; label: string; roles: Role[] }> = [
   { to: "/", label: "Dashboard", roles: ["admin", "officer", "coordinator", "recruiter", "student"] },
@@ -59,7 +59,9 @@ export function Shell() {
         </footer>
       </aside>
       <main className="main">
-        <Outlet />
+        <div className="page">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -1,17 +1,20 @@
+import os
 from datetime import timedelta
 
 import pyotp
 import pytest
 from sqlalchemy import select, text
 
-from app.clock import today_ist, utcnow
-from app.database import SessionLocal
-from app.models import AuditLog, UserSession
+from app.core.clock import today_ist, utcnow
+from app.core.database import SessionLocal
+from app.persistence.models import AuditLog, UserSession
 
 HEADER = {"X-Requested-With": "placement"}
 
 
-def login(client, email, password="Admin@2026!"):
+def login(client, email, password=None):
+    if password is None:
+        password = os.environ["ADMIN_PASSWORD"]
     response = client.post("/api/auth/login", json={"email": email, "password": password}, headers=HEADER)
     assert response.status_code == 200, response.text
     return response.json()
@@ -30,7 +33,7 @@ def test_login_and_role_labels(client):
 
 
 def test_duplicate_placement_id_is_rejected(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     body = {
         "placement_id": "NFSU-2026-001",
         "full_name": "Copy Student",
@@ -47,7 +50,7 @@ def test_duplicate_placement_id_is_rejected(client):
 
 
 def test_markup_in_a_name_is_rejected(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     body = {
         "placement_id": "NFSU-2026-777",
         "full_name": "<script>alert(1)</script>",
@@ -61,7 +64,7 @@ def test_markup_in_a_name_is_rejected(client):
 
 
 def test_search_is_parameterised(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     hostile = client.get("/api/students", params={"q": "'; DROP TABLE students;--"})
     assert hostile.status_code == 200
     again = client.get("/api/students")
@@ -70,11 +73,11 @@ def test_search_is_parameterised(client):
 
 
 def test_student_cannot_read_or_edit_another_record(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     listing = client.get("/api/students", params={"q": "Aisha"}).json()
     aisha = listing["items"][0]["id"]
     client.post("/api/auth/logout", headers=HEADER)
-    login(client, "ananya.shah@nfsu.ac.in", "Student@2026!")
+    login(client, "ananya.shah@nfsu.ac.in", os.environ["STUDENT_PASSWORD"])
     assert client.get("/api/students").status_code == 403
     denied = client.get(f"/api/students/{aisha}")
     assert denied.status_code == 404
@@ -111,11 +114,11 @@ def test_placement_status_cannot_be_assigned_directly(client):
 
 
 def test_coordinator_is_limited_to_one_programme(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     neel = client.get("/api/students", params={"q": "Neel Kapoor"}).json()["items"][0]
     aisha = client.get("/api/students", params={"q": "Aisha"}).json()["items"][0]
     client.post("/api/auth/logout", headers=HEADER)
-    login(client, "coord.cs@nfsu.ac.in", "Coord@2026!")
+    login(client, "coord.cs@nfsu.ac.in", os.environ["COORDINATOR_PASSWORD"])
     assert client.get(f"/api/students/{neel['id']}").status_code == 404
     assert client.get(f"/api/students/{aisha['id']}").status_code == 200
     blocked = client.patch(
@@ -128,7 +131,7 @@ def test_coordinator_is_limited_to_one_programme(client):
 
 
 def test_drive_package_cannot_be_overstated_by_the_client(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     ananya = client.get("/api/students", params={"q": "Ananya"}).json()["items"][0]
     drives = client.get("/api/drives").json()["items"]
     fieldnote = next(item for item in drives if item["title"] == "Fieldnote FTE")
@@ -151,7 +154,7 @@ def test_drive_package_cannot_be_overstated_by_the_client(client):
 
 
 def test_switching_rules_block_a_second_fte(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     rohan = client.get("/api/students", params={"q": "Rohan"}).json()["items"][0]
     drives = client.get("/api/drives").json()["items"]
     kavach = next(item for item in drives if item["title"] == "Kavach FTE 2026")
@@ -189,7 +192,7 @@ def test_administrator_override_is_audited(client):
 
 
 def test_recruiter_sees_no_contact_or_pay(client):
-    login(client, "recruiter@kavach.example", "Recruit@2026!")
+    login(client, "recruiter@kavach.example", os.environ["RECRUITER_PASSWORD"])
     assert client.get("/api/students").status_code == 403
     drives = client.get("/api/drives").json()["items"]
     assert drives
@@ -206,7 +209,7 @@ def test_recruiter_sees_no_contact_or_pay(client):
 
 
 def test_reports_separate_people_packages_and_stipends(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     report = client.get("/api/reports/overview").json()
     totals = report["totals"]
     assert totals["placed"] == 8
@@ -222,7 +225,7 @@ def test_reports_separate_people_packages_and_stipends(client):
 
 
 def test_officer_cannot_change_policy_or_archive(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     ananya = client.get("/api/students", params={"q": "Ananya"}).json()["items"][0]
     assert client.post(f"/api/students/{ananya['id']}/archive", headers=HEADER).status_code == 403
     current = client.get("/api/policy").json()["config"]
@@ -230,7 +233,7 @@ def test_officer_cannot_change_policy_or_archive(client):
 
 
 def test_export_is_audited_and_coordinator_export_stays_in_programme(client):
-    login(client, "coord.cs@nfsu.ac.in", "Coord@2026!")
+    login(client, "coord.cs@nfsu.ac.in", os.environ["COORDINATOR_PASSWORD"])
     response = client.get("/api/exports/students")
     assert response.status_code == 200
     assert "mobile" in response.text
@@ -280,7 +283,7 @@ def test_optional_mfa(client):
     client.post("/api/auth/logout", headers=HEADER)
     challenge = client.post(
         "/api/auth/login",
-        json={"email": "admin@nfsu.ac.in", "password": "Admin@2026!"},
+        json={"email": "admin@nfsu.ac.in", "password": os.environ["ADMIN_PASSWORD"]},
         headers=HEADER,
     ).json()
     assert challenge["mfa_required"] is True
@@ -315,12 +318,12 @@ def test_login_is_rate_limited(client):
 
 
 def test_mutation_without_request_context_is_rejected(client):
-    response = client.post("/api/auth/login", json={"email": "admin@nfsu.ac.in", "password": "Admin@2026!"})
+    response = client.post("/api/auth/login", json={"email": "admin@nfsu.ac.in", "password": os.environ["ADMIN_PASSWORD"]})
     assert response.status_code == 403
 
 
 def test_drive_precheck_explains_blocks_and_hides_them_from_recruiters(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     drives = client.get("/api/drives").json()["items"]
     kavach = next(item for item in drives if item["title"] == "Kavach FTE 2026")
     precheck = client.get(f"/api/drives/{kavach['id']}/precheck")
@@ -331,7 +334,7 @@ def test_drive_precheck_explains_blocks_and_hides_them_from_recruiters(client):
     assert rohan["verdict"] == "block"
     assert any("FTE" in reason or "offer type" in reason.lower() or "already" in reason.lower() for reason in rohan["reasons"])
     client.post("/api/auth/logout", headers=HEADER)
-    login(client, "recruiter@kavach.example", "Recruit@2026!")
+    login(client, "recruiter@kavach.example", os.environ["RECRUITER_PASSWORD"])
     denied = client.get(f"/api/drives/{kavach['id']}/precheck")
     assert denied.status_code == 403
     candidates = client.get(f"/api/drives/{kavach['id']}/candidates").json()
@@ -340,7 +343,7 @@ def test_drive_precheck_explains_blocks_and_hides_them_from_recruiters(client):
 
 
 def test_exception_resolution_records_officer_and_justification(client):
-    login(client, "officer@nfsu.ac.in", "Officer@2026!")
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
     queue = client.get("/api/compliance")
     assert queue.status_code == 200
     open_flag = next(item for item in queue.json()["items"] if item["status"] == "open" and item["kind"] == "offer_expired")

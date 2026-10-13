@@ -4,7 +4,7 @@ from fastapi import HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.config import settings
+from app.core.config import settings
 
 
 def fail(status: int, message: str, **extra) -> None:

@@ -1,5 +1,5 @@
-from app.domain import DEFAULT_CONFIG, OfferSnap, StudentSnap
-from app.stats import summarize
+from app.domain.catalog import DEFAULT_CONFIG, OfferSnap, StudentSnap
+from app.domain.stats import summarize
 
 
 def student(sid, course="MTECH_CS", **kwargs):

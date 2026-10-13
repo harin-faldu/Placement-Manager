@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 *.db
 .env
+!.env.example
 node_modules/
 dist/
 backups/

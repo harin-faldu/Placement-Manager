@@ -4,13 +4,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: placement
-      POSTGRES_PASSWORD: placement-dev-only
-      POSTGRES_DB: placement
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U placement -d placement"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -18,13 +18,20 @@ services:
   api:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql+psycopg://placement:placement-dev-only@db:5432/placement
-      SECRET_KEY: dev-only-change-me
-      FERNET_KEY: MJwr1Ha0E6YjANmlqa58KANk9eQxMlf5OabFobfgfgk=
-      SEED: "1"
-      COOKIE_SECURE: "false"
-      TRUST_PROXY: "true"
-      CORS_ORIGINS: ""
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      FERNET_KEY: ${FERNET_KEY}
+      SEED: ${SEED}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      TRUST_PROXY: ${TRUST_PROXY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      SESSION_HOURS: ${SESSION_HOURS}
+      IDLE_MINUTES: ${IDLE_MINUTES}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      OFFICER_PASSWORD: ${OFFICER_PASSWORD}
+      COORDINATOR_PASSWORD: ${COORDINATOR_PASSWORD}
+      RECRUITER_PASSWORD: ${RECRUITER_PASSWORD}
+      STUDENT_PASSWORD: ${STUDENT_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -36,7 +43,14 @@ services:
       start_period: 30s
 
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+        OFFICER_PASSWORD: ${OFFICER_PASSWORD}
+        COORDINATOR_PASSWORD: ${COORDINATOR_PASSWORD}
+        RECRUITER_PASSWORD: ${RECRUITER_PASSWORD}
+        STUDENT_PASSWORD: ${STUDENT_PASSWORD}
     ports:
       - "8090:80"
     depends_on:

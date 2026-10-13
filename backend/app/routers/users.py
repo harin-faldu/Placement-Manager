@@ -5,13 +5,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.deps import require
-from app.http import client_ip, conflict, fail
-from app.models import Company, Student, User
-from app.schemas import UserCreate, UserPatch
-from app.security import hash_password, password_problems
-from app.services import audit, user_public
+from app.core.database import get_db
+from app.core.deps import require
+from app.core.http import client_ip, conflict, fail
+from app.persistence.models import Company, Student, User
+from app.persistence.schemas import UserCreate, UserPatch
+from app.core.security import hash_password, password_problems
+from app.services.placement import audit, user_public
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

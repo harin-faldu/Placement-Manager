@@ -1,8 +1,8 @@
 import copy
 from datetime import date
 
-from app.domain import DEFAULT_CONFIG, DriveSnap, OfferSnap, StudentSnap
-from app.policy import acceptance_window, category_for, evaluate, further_paths, placement_status_of
+from app.domain.catalog import DEFAULT_CONFIG, DriveSnap, OfferSnap, StudentSnap
+from app.domain.policy import acceptance_window, category_for, evaluate, further_paths, placement_status_of
 
 
 def config():

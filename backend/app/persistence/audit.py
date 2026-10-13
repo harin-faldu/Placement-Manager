@@ -6,8 +6,8 @@ import json
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.clock import utcnow
-from app.models import AuditLog
+from app.core.clock import utcnow
+from app.persistence.models import AuditLog
 
 
 def write_audit(

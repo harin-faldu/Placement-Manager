@@ -7,15 +7,15 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.clock import today_ist, utcnow
-from app.database import get_db
-from app.deps import require
-from app.domain import DriveSnap
-from app.http import client_ip, fail
-from app.models import Company, Drive, Offer, OfferEvent, Student, User
-from app.policy import acceptance_window, evaluate
-from app.schemas import OfferCreate, OfferPatch, OfferVoid
-from app.services import (
+from app.core.clock import today_ist, utcnow
+from app.core.database import get_db
+from app.core.deps import require
+from app.domain.catalog import DriveSnap
+from app.core.http import client_ip, fail
+from app.persistence.models import Company, Drive, Offer, OfferEvent, Student, User
+from app.domain.policy import acceptance_window, evaluate
+from app.persistence.schemas import OfferCreate, OfferPatch, OfferVoid
+from app.services.placement import (
     audit,
     can_read_student,
     company_map,

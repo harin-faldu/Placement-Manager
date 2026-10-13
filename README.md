@@ -10,15 +10,15 @@ docker compose up --build
 
 Open http://localhost:8090
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Placement Administrator | admin@nfsu.ac.in | Admin@2026! |
-| Placement Officer | officer@nfsu.ac.in | Officer@2026! |
-| Course Coordinator, M.Tech. CS | coord.cs@nfsu.ac.in | Coord@2026! |
-| Kavach Security recruiter | recruiter@kavach.example | Recruit@2026! |
-| Student, Ananya Shah | ananya.shah@nfsu.ac.in | Student@2026! |
+| Role | Email |
+| --- | --- |
+| Placement Administrator | admin@nfsu.ac.in |
+| Placement Officer | officer@nfsu.ac.in |
+| Course Coordinator, M.Tech. CS | coord.cs@nfsu.ac.in |
+| Kavach Security recruiter | recruiter@kavach.example |
+| Student, Ananya Shah | ananya.shah@nfsu.ac.in |
 
-These accounts are for the prototype. The sign-in page repeats them so the register can be evaluated without a separate credential store.
+Passwords, the database login, and the encryption keys are in `.env`. Copy `.env.example` to `.env` before the first start. The sign-in page shows the prototype passwords from that file.
 
 ## What it enforces
 

@@ -6,14 +6,14 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.clock import utcnow
-from app.database import get_db
-from app.deps import require
-from app.http import client_ip, fail
-from app.models import Company, ComplianceFlag, Drive, Offer, PolicyConfig, Student, User
-from app.policy import category_for, evaluate, narrative
-from app.schemas import FlagResolve, PolicyCheck, PolicyUpdate
-from app.services import audit, can_read_student, drive_snap, load_config, pending_absence_ids, snaps_for, student_snap
+from app.core.clock import utcnow
+from app.core.database import get_db
+from app.core.deps import require
+from app.core.http import client_ip, fail
+from app.persistence.models import Company, ComplianceFlag, Drive, Offer, PolicyConfig, Student, User
+from app.domain.policy import category_for, evaluate, narrative
+from app.persistence.schemas import FlagResolve, PolicyCheck, PolicyUpdate
+from app.services.placement import audit, can_read_student, drive_snap, load_config, pending_absence_ids, snaps_for, student_snap
 
 router = APIRouter(prefix="/api", tags=["policy"])
 

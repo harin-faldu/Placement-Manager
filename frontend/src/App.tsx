@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "./auth";
+import { useAuth } from "./lib/auth";
 import { AccessPage } from "./pages/Access";
 import { AuditPage } from "./pages/Audit";
 import { Dashboard } from "./pages/Dashboard";
@@ -10,7 +10,7 @@ import { Recruitment } from "./pages/Recruitment";
 import { Reports } from "./pages/Reports";
 import { StudentDetail } from "./pages/StudentDetail";
 import { Students } from "./pages/Students";
-import { RequireAuth, Shell } from "./ui";
+import { RequireAuth, Shell } from "./components/ui";
 
 export function App() {
   const { user } = useAuth();
