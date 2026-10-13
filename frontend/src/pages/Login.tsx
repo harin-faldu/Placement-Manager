@@ -1,22 +1,22 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiError, api } from "../api";
-import { useAuth } from "../auth";
-import type { User } from "../types";
+import { ApiError, api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import type { User } from "../lib/types";
 
 const ACCOUNTS = [
-  ["Administrator", "admin@nfsu.ac.in", "Admin@2026!"],
-  ["Officer", "officer@nfsu.ac.in", "Officer@2026!"],
-  ["Coordinator", "coord.cs@nfsu.ac.in", "Coord@2026!"],
-  ["Recruiter", "recruiter@kavach.example", "Recruit@2026!"],
-  ["Student", "ananya.shah@nfsu.ac.in", "Student@2026!"],
+  ["Administrator", "admin@nfsu.ac.in", import.meta.env.VITE_ADMIN_PASSWORD],
+  ["Officer", "officer@nfsu.ac.in", import.meta.env.VITE_OFFICER_PASSWORD],
+  ["Coordinator", "coord.cs@nfsu.ac.in", import.meta.env.VITE_COORDINATOR_PASSWORD],
+  ["Recruiter", "recruiter@kavach.example", import.meta.env.VITE_RECRUITER_PASSWORD],
+  ["Student", "ananya.shah@nfsu.ac.in", import.meta.env.VITE_STUDENT_PASSWORD],
 ];
 
 export function Login() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const [email, setEmail] = useState("admin@nfsu.ac.in");
-  const [password, setPassword] = useState("Admin@2026!");
+  const [password, setPassword] = useState(import.meta.env.VITE_ADMIN_PASSWORD);
   const [challenge, setChallenge] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -71,7 +71,7 @@ export function Login() {
           <p className="lede">Prototype access for the placement session. Do not load live personal data.</p>
           {!challenge ? (
             <>
-              <label className="stack">
+              <label>
                 Email
                 <input value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
               </label>
