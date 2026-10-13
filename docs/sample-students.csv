@@ -1,0 +1,3 @@
+placement_id,full_name,mobile,email,course,batch,registration_status,eligibility_status,cgpa
+NFSU-2026-901,Riya Sen,9876500101,riya.sen@nfsu.ac.in,MTECH_CS,2026,registered,eligible,8.2
+NFSU-2026-902,John Dsouza,9876500102,john.dsouza@nfsu.ac.in,MSC_DFIS,2026,not_registered,pending_verification,7.4

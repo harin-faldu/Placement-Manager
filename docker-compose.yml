@@ -1,0 +1,47 @@
+name: nfsu-placement
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: placement
+      POSTGRES_PASSWORD: placement-dev-only
+      POSTGRES_DB: placement
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placement -d placement"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://placement:placement-dev-only@db:5432/placement
+      SECRET_KEY: dev-only-change-me
+      FERNET_KEY: MJwr1Ha0E6YjANmlqa58KANk9eQxMlf5OabFobfgfgk=
+      SEED: "1"
+      COOKIE_SECURE: "false"
+      TRUST_PROXY: "true"
+      CORS_ORIGINS: ""
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  web:
+    build: ./frontend
+    ports:
+      - "8090:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
