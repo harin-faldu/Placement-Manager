@@ -1,24 +1,12 @@
 name: nfsu-placement
 
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   api:
     build: ./backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@host.docker.internal:3306/${MYSQL_DATABASE}?charset=utf8mb4
       SECRET_KEY: ${SECRET_KEY}
       FERNET_KEY: ${FERNET_KEY}
       SEED: ${SEED}
@@ -32,15 +20,12 @@ services:
       COORDINATOR_PASSWORD: ${COORDINATOR_PASSWORD}
       RECRUITER_PASSWORD: ${RECRUITER_PASSWORD}
       STUDENT_PASSWORD: ${STUDENT_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      start_period: 40s
 
   web:
     build:
@@ -56,6 +41,3 @@ services:
     depends_on:
       api:
         condition: service_healthy
-
-volumes:
-  pgdata:

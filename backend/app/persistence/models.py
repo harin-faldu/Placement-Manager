@@ -159,7 +159,7 @@ class OfferEvent(Base):
     action: Mapped[str] = mapped_column(String(32))
     before_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     after_json: Mapped[str | None] = mapped_column(Text, nullable=True)
-    actor_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    actor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
@@ -232,4 +232,4 @@ class PolicyConfig(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     data_json: Mapped[str] = mapped_column(Text)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
-    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)

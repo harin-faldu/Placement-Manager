@@ -10,7 +10,19 @@ from sqlalchemy.orm import Session
 from app.persistence.audit import write_audit
 from app.core.clock import today_ist, utcnow
 from app.domain.catalog import COURSES, DEFAULT_CONFIG
-from app.persistence.models import Attendance, Company, ComplianceFlag, Drive, Offer, PolicyConfig, Student, User
+from app.persistence.models import (
+    Application,
+    Attendance,
+    Company,
+    ComplianceFlag,
+    Drive,
+    ExclusionCharge,
+    Offer,
+    OfferEvent,
+    PolicyConfig,
+    Student,
+    User,
+)
 from app.domain.policy import acceptance_window, placement_status_of
 from app.core.security import encrypt_mobile, hash_password, mobile_digest
 from app.services.placement import offer_snap
@@ -146,15 +158,22 @@ def seed(db: Session) -> None:
         role="recruiter",
         company_id=companies["Kavach Security"].id,
     )
-    student_user = User(
-        email="ananya.shah@nfsu.ac.in",
-        password_hash=hash_password(account_password("STUDENT")),
-        full_name="Ananya Shah",
-        role="student",
-        student_id=students["NFSU-2026-007"].id,
-    )
-    db.add_all([admin, officer, coordinator, recruiter, student_user])
+    student_password = hash_password(account_password("STUDENT"))
+    student_users = [
+        User(
+            email=student.email,
+            password_hash=student_password,
+            full_name=student.full_name,
+            role="student",
+            student_id=student.id,
+        )
+        for student in students.values()
+    ]
+    db.add_all([admin, officer, coordinator, recruiter, *student_users])
     db.flush()
+    policy_row = db.get(PolicyConfig, 1)
+    if policy_row is not None:
+        policy_row.updated_by = admin.id
 
     offer_rows = [
         ("NFSU-2026-001", "Northstar A+ FTE", "accepted", "joined", "na", False, "not_required", today - timedelta(days=30)),
@@ -181,8 +200,7 @@ def seed(db: Session) -> None:
                 category = "B"
             else:
                 category = "C"
-        db.add(
-            Offer(
+        offer = Offer(
                 student_id=students[pid].id,
                 company_id=drive.company_id,
                 drive_id=drive.id,
@@ -200,6 +218,24 @@ def seed(db: Session) -> None:
                 is_off_campus=off_campus,
                 noc_status=noc,
                 policy_verdict="allow",
+                created_by=officer.id,
+            )
+        db.add(offer)
+        db.flush()
+        db.add(
+            OfferEvent(
+                offer_id=offer.id,
+                action="recorded",
+                before_json=None,
+                after_json=json.dumps({"acceptance_status": acceptance, "drive": title}),
+                actor_id=officer.id,
+            )
+        )
+        db.add(
+            Application(
+                drive_id=drive.id,
+                student_id=students[pid].id,
+                verdict="allow",
                 created_by=officer.id,
             )
         )
@@ -224,11 +260,18 @@ def seed(db: Session) -> None:
             created_by=officer.id,
         )
     )
+    db.add(
+        ExclusionCharge(
+            student_id=students["NFSU-2026-012"].id,
+            drive_id=drives["Kavach Summer Internship"].id,
+        )
+    )
     leela_offer = db.scalar(select(Offer).where(Offer.student_id == students["NFSU-2025-014"].id))
     db.add(
         ComplianceFlag(
             student_id=students["NFSU-2025-014"].id,
             offer_id=leela_offer.id if leela_offer else None,
+            drive_id=drives["Meridian Analyst"].id,
             kind="offer_expired",
             message="An offer passed its acceptance deadline and was marked expired.",
             status="open",

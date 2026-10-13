@@ -8,7 +8,7 @@ Policy-checked register for the 2026–27 placement session. Five capabilities c
 docker compose up --build
 ```
 
-Open http://localhost:8090
+Open http://localhost:8090. The API and the web server run in Docker. MySQL stays on this machine, database `placement`, user `placement`.
 
 | Role | Email |
 | --- | --- |

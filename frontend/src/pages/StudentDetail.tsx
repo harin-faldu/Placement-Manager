@@ -65,6 +65,19 @@ export function StudentDetail() {
     }
   }
 
+  async function setEligibility(status: string) {
+    if (!detail || status === detail.student.eligibility_status) return;
+    setError("");
+    setMessage("");
+    try {
+      await api(`/api/students/${detail.student.id}`, { method: "PATCH", body: JSON.stringify({ eligibility_status: status }) });
+      setMessage(status === "eligible" ? "Eligibility verified. Drive checks now treat this student as eligible." : "Eligibility updated.");
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not update eligibility");
+    }
+  }
+
   async function patchOffer(offerId: string, body: Record<string, string>) {
     setError("");
     try {
@@ -112,6 +125,19 @@ export function StudentDetail() {
         <article className="card">
           <h2>Contact and control</h2>
           <p className="note">Compensation and contact stay with roles that are allowed to see this programme. A student cannot change an outcome.</p>
+          {canEdit && (
+            <label>
+              Eligibility
+              <select value={student.eligibility_status} onChange={(event) => setEligibility(event.target.value)}>
+                <option value="pending_verification">Pending verification</option>
+                <option value="eligible">Eligible</option>
+                <option value="ineligible">Ineligible</option>
+              </select>
+            </label>
+          )}
+          {canEdit && <p className="note">Pending verification keeps the student out of an automatic allow. Choose Eligible after the documents check out, or Ineligible if they do not.</p>}
+          {error && <Banner tone="bad">{error}</Banner>}
+          {message && <Banner tone="good">{message}</Banner>}
           {canEdit && student.exclusion_drives_remaining > 0 && (
             <button
               className="secondary"

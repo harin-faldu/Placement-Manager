@@ -53,6 +53,23 @@ def install_guards(bind=None) -> None:
             END
             """,
         ]
+    elif target.dialect.name == "mysql":
+        statements = [
+            "DROP TRIGGER IF EXISTS audit_logs_no_update",
+            "DROP TRIGGER IF EXISTS audit_logs_no_delete",
+            """
+            CREATE TRIGGER audit_logs_no_update
+            BEFORE UPDATE ON audit_logs
+            FOR EACH ROW
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'audit log is append-only'
+            """,
+            """
+            CREATE TRIGGER audit_logs_no_delete
+            BEFORE DELETE ON audit_logs
+            FOR EACH ROW
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'audit log is append-only'
+            """,
+        ]
     elif target.dialect.name == "postgresql":
         statements = [
             """

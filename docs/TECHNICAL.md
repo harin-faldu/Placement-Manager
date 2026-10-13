@@ -2,7 +2,7 @@
 
 ## Architecture
 
-The browser talks only to the web container. Nginx serves the interface and proxies `/api` to the FastAPI application. The API uses SQLAlchemy with parameterised queries against Postgres. SQLite is used only for the automated tests.
+The browser talks only to the web container. Nginx serves the interface and proxies `/api` to the FastAPI application. The API uses SQLAlchemy with parameterised queries against a local MySQL database named `placement`. SQLite is used only for the automated tests.
 
 Placement status, category, and package statistics are derived. Clients cannot submit a category or a placement status. When an offer is tied to a drive, the CTC and stipend are copied from the drive on the server.
 
@@ -27,7 +27,7 @@ Placement status, category, and package statistics are derived. Clients cannot s
 | Confidentiality | Mobile encrypted with Fernet. List and recruiter payloads omit contact and compensation. API responses use `Cache-Control: no-store` |
 | Input | Pydantic validation, markup rejected in names, CSV size cap |
 | Queries | SQLAlchemy bound parameters |
-| Audit | Hash chain from a genesis value. Postgres and SQLite triggers reject update and delete |
+| Audit | Hash chain from a genesis value. MySQL and SQLite triggers reject update and delete |
 | Export | Role-scoped, audited, not cached |
 | Browser | Content Security Policy, frame denial, nosniff, and a required `X-Requested-With` header on changes |
 
@@ -38,10 +38,10 @@ Secrets are read from `.env`. Replace `SECRET_KEY`, `FERNET_KEY`, the database p
 From the project directory, with the stack running:
 
 ```powershell
-docker compose exec -T db pg_dump -U placement placement > backups\placement.sql
+mysqldump -u placement -p placement > backups\placement.sql
 ```
 
-Restore into an empty database with `psql` or `docker compose exec -T db psql -U placement placement`. The dump contains personal data and should be stored with the same care as the database. This procedure was not executed against a second environment in this prototype.
+Restore with `mysql -u placement -p placement < backups\placement.sql`. The dump contains personal data and should be stored with the same care as the database.
 
 ## Tests
 

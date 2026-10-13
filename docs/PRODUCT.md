@@ -42,7 +42,7 @@ This is the path a real drive follows. The software does not invent the offer. A
 
 ## How one click is decided
 
-The browser never talks to Postgres. Nginx in the web container serves the React app and forwards `/api` to FastAPI. FastAPI checks the session cookie, checks the role, loads the student and the drive, and calls `evaluate()` in `backend/app/domain/policy.py`. That function is pure: it does not write to the database. It returns a list of checks. Any failing check makes the verdict **block**. Otherwise any review check makes the verdict **review**. Otherwise the verdict is **allow**.
+The browser never talks to MySQL. Nginx in the web container serves the React app and forwards `/api` to FastAPI. FastAPI checks the session cookie, checks the role, loads the student and the drive, and calls `evaluate()` in `backend/app/domain/policy.py`. That function is pure: it does not write to the database. It returns a list of checks. Any failing check makes the verdict **block**. Otherwise any review check makes the verdict **review**. Otherwise the verdict is **allow**.
 
 The screen then shows those checks. Saving an offer, listing candidates, and the drive precheck all call this same function, so the three screens cannot disagree.
 
@@ -179,7 +179,7 @@ The sidebar is only a convenience. Every mutation is checked again in `backend/a
 
 ## What is stored, and what is calculated
 
-Stored in Postgres (`backend/app/persistence/models.py`):
+Stored in the local MySQL database `placement` (`backend/app/persistence/models.py`):
 
 | Table | Why it exists |
 | --- | --- |
@@ -205,14 +205,14 @@ Calculated, not stored as something a client may set:
 
 | File | Why it is there |
 | --- | --- |
-| `docker-compose.yml` | Starts Postgres, the API, and the web server. It does not contain passwords. It reads them from `.env`. |
+| `docker-compose.yml` | Starts the API and the web server, and points them at local MySQL. It does not contain passwords. It reads them from `.env`. |
 | `.env` | Database password, signing key, encryption key, and the five prototype passwords. Git ignores this file. |
 | `.env.example` | The same names with placeholders, so another machine knows what to set. |
 | `frontend/Dockerfile` | Builds the interface. Prototype passwords are passed in at build time so the sign-in page can show them. |
 | `backend/Dockerfile` | Runs the API as a non-root user. |
 | `frontend/nginx.conf` | Serves the built interface and proxies `/api`. |
 
-A request enters nginx, is proxied to FastAPI, and FastAPI uses SQLAlchemy with bound parameters. Tests use an in-memory SQLite database instead of Postgres, with the same models.
+A request enters nginx, is proxied to FastAPI, and FastAPI uses SQLAlchemy with bound parameters against local MySQL. Tests use an in-memory SQLite database, with the same models.
 
 ### Backend
 
