@@ -31,7 +31,7 @@ Passwords, the database login, and the encryption keys are in `.env`. Copy `.env
 
 Stipend and annual CTC are stored and reported separately. Placed students are counted once; offers are counted as events.
 
-The requirements, role boundaries, and the reasons this register is built this way are in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Schema, controls, tests, backup, and limitations are in [docs/TECHNICAL.md](docs/TECHNICAL.md).
+To walk the product role by role, explore workflows, understand role capabilities, and see how eligibility is checked, start with [docs/EXPLORATION_AND_ARCHITECTURE_GUIDE.md](docs/EXPLORATION_AND_ARCHITECTURE_GUIDE.md) and [docs/PRODUCT.md](docs/PRODUCT.md). The requirements are in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Schema, controls, tests, backup, and limitations are in [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
 ## Tests
 

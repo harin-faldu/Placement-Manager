@@ -43,6 +43,7 @@ def test_duplicate_placement_id_is_rejected(client):
         "batch": "2026",
         "registration_status": "registered",
         "eligibility_status": "eligible",
+        "password": "Copy@2026!",
     }
     response = client.post("/api/students", json=body, headers=HEADER)
     assert response.status_code == 409
@@ -360,3 +361,38 @@ def test_exception_resolution_records_officer_and_justification(client):
     stored = next(item for item in again if item["id"] == open_flag["id"])
     assert stored["status"] == "resolved"
     assert stored["resolved_by"] == "officer@nfsu.ac.in"
+
+
+def test_a_new_student_can_sign_in_and_enter_a_drive_check(client):
+    login(client, "admin@nfsu.ac.in")
+    created = client.post(
+        "/api/students",
+        json={
+            "placement_id": "NFSU-2026-880",
+            "full_name": "Meera Iyer",
+            "mobile": "9010000880",
+            "email": "meera.iyer@nfsu.ac.in",
+            "password": "Meera@2026!",
+            "course": "MTECH_CS",
+            "batch": "2026",
+            "registration_status": "registered",
+            "eligibility_status": "eligible",
+            "cgpa": 8.1,
+        },
+        headers=HEADER,
+    )
+    assert created.status_code == 200, created.text
+    student_id = created.json()["id"]
+    assert created.json()["sign_in_email"] == "meera.iyer@nfsu.ac.in"
+    client.post("/api/auth/logout", headers=HEADER)
+    login(client, "meera.iyer@nfsu.ac.in", "Meera@2026!")
+    own = client.get(f"/api/students/{student_id}")
+    assert own.status_code == 200
+    assert own.json()["standing"]["placement_status"] == "unplaced"
+    client.post("/api/auth/logout", headers=HEADER)
+    login(client, "officer@nfsu.ac.in", os.environ["OFFICER_PASSWORD"])
+    drives = client.get("/api/drives").json()["items"]
+    kavach = next(item for item in drives if item["title"] == "Kavach FTE 2026")
+    precheck = client.get(f"/api/drives/{kavach['id']}/precheck").json()
+    meera = next(item for item in precheck["items"] if item["full_name"] == "Meera Iyer")
+    assert meera["verdict"] == "allow"

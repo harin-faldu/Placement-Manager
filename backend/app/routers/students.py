@@ -15,8 +15,8 @@ from app.core.deps import require
 from app.domain.catalog import COURSES
 from app.core.http import client_ip, conflict, fail
 from app.persistence.models import Attendance, Drive, Offer, Student, User
-from app.persistence.schemas import ExclusionUpdate, StudentCreate, StudentUpdate
-from app.core.security import encrypt_mobile, mobile_digest
+from app.persistence.schemas import ExclusionUpdate, StudentCreate, StudentProvision, StudentUpdate
+from app.core.security import encrypt_mobile, hash_password, mobile_digest, password_problems
 from app.services.placement import (
     attendance_dict,
     audit,
@@ -61,6 +61,32 @@ def _insert_student(db: Session, body: StudentCreate) -> Student:
     db.add(student)
     db.flush()
     return student
+
+
+def _open_student_login(db: Session, student: Student, password: str, actor: User, request: Request) -> User:
+    problem = password_problems(password)
+    if problem:
+        fail(422, problem)
+    account = User(
+        email=student.email,
+        password_hash=hash_password(password),
+        full_name=student.full_name,
+        role="student",
+        student_id=student.id,
+    )
+    db.add(account)
+    db.flush()
+    audit(
+        db,
+        actor,
+        "user.create",
+        "user",
+        account.id,
+        None,
+        {"email": account.email, "role": "student", "student_id": student.id},
+        client_ip(request),
+    )
+    return account
 
 
 @router.get("/students")
@@ -114,18 +140,19 @@ def list_students(
 
 @router.post("/students")
 def create_student(
-    body: StudentCreate,
+    body: StudentProvision,
     request: Request,
     user: User = Depends(require("admin", "officer")),
     db: Session = Depends(get_db),
 ):
     try:
         student = _insert_student(db, body)
+        _open_student_login(db, student, body.password, user, request)
         audit(db, user, "student.create", "student", student.id, None, profile_snapshot(student, reveal_contact=True), client_ip(request))
         db.commit()
     except IntegrityError as exc:
         conflict(db, exc)
-    return student_dict(student, user)
+    return student_dict(student, user) | {"sign_in_email": student.email}
 
 
 @router.get("/students/{student_id}")

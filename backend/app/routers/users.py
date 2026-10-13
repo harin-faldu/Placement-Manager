@@ -48,10 +48,11 @@ def create_user(
     if problem:
         fail(422, problem)
     _check_links(db, body.role, body.course, body.company_id, body.student_id)
+    linked = db.get(Student, body.student_id) if body.role == "student" and body.student_id else None
     account = User(
-        email=body.email,
+        email=linked.email if linked else body.email,
         password_hash=hash_password(body.password),
-        full_name=body.full_name,
+        full_name=linked.full_name if linked else body.full_name,
         role=body.role,
         course=body.course if body.role == "coordinator" else None,
         company_id=body.company_id if body.role == "recruiter" else None,

@@ -79,6 +79,10 @@ class StudentCreate(BaseModel):
         return clean_text(value)
 
 
+class StudentProvision(StudentCreate):
+    password: str = Field(min_length=10, max_length=200)
+
+
 class StudentUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     full_name: str | None = None

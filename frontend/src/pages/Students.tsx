@@ -10,10 +10,11 @@ const EMPTY = {
   full_name: "",
   mobile: "",
   email: "",
+  password: "",
   course: "MTECH_CS",
   batch: "2026",
   registration_status: "registered",
-  eligibility_status: "pending_verification",
+  eligibility_status: "eligible",
   cgpa: "",
 };
 
@@ -58,11 +59,11 @@ export function Students() {
     setError("");
     setMessage("");
     try {
-      const created = await api<Student>("/api/students", {
+      const created = await api<Student & { sign_in_email: string }>("/api/students", {
         method: "POST",
         body: JSON.stringify({ ...form, cgpa: form.cgpa ? Number(form.cgpa) : null }),
       });
-      setMessage(`${created.full_name} is on the register.`);
+      setMessage(`${created.full_name} can sign in as ${created.sign_in_email} with the password you set. The record is included in drive checks.`);
       setForm(EMPTY);
       load();
     } catch (err) {
@@ -131,7 +132,7 @@ export function Students() {
         {(user?.role === "admin" || user?.role === "officer") && (
           <form className="card stack" onSubmit={create}>
             <h2>New record</h2>
-            <p className="note">Placement ID is permanent. Status is derived later from offers, not typed in here.</p>
+            <p className="note">Placement ID is permanent. The email and password are the student's sign-in. Registered and eligible students appear in drive checks. Placement status is derived later from offers.</p>
             {(["placement_id", "full_name", "mobile", "email", "batch"] as const).map((field) => (
               <label key={field}>
                 {field.replaceAll("_", " ")}
@@ -139,12 +140,33 @@ export function Students() {
               </label>
             ))}
             <label>
+              Password
+              <input type="password" autoComplete="new-password" minLength={10} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} required />
+            </label>
+            <p className="note">At least 10 characters, with upper case, lower case, and a number.</p>
+            <label>
               Programme
               <select value={form.course} onChange={(event) => setForm({ ...form, course: event.target.value })}>
                 {courses.map((course) => <option key={course.code} value={course.code}>{course.name}</option>)}
               </select>
             </label>
             <label>CGPA<input value={form.cgpa} onChange={(event) => setForm({ ...form, cgpa: event.target.value })} /></label>
+            <label>
+              Registration
+              <select value={form.registration_status} onChange={(event) => setForm({ ...form, registration_status: event.target.value })}>
+                <option value="registered">Registered</option>
+                <option value="not_registered">Not registered</option>
+                <option value="deregistered">Deregistered</option>
+              </select>
+            </label>
+            <label>
+              Eligibility
+              <select value={form.eligibility_status} onChange={(event) => setForm({ ...form, eligibility_status: event.target.value })}>
+                <option value="eligible">Eligible</option>
+                <option value="pending_verification">Pending verification</option>
+                <option value="ineligible">Ineligible</option>
+              </select>
+            </label>
             {error && <Banner tone="bad">{error}</Banner>}
             {message && <Banner tone="good">{message}</Banner>}
             <button type="submit">Create record</button>

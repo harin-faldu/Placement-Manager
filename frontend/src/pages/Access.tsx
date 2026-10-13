@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import type { Company, Course, User } from "../lib/types";
+import type { Company, Course, Student, User } from "../lib/types";
 import { Banner, Pill } from "../components/ui";
 
 export function AccessPage() {
@@ -9,7 +9,8 @@ export function AccessPage() {
   const [items, setItems] = useState<User[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [form, setForm] = useState({ email: "", full_name: "", password: "", role: "officer", course: "", company_id: "" });
+  const [students, setStudents] = useState<Student[]>([]);
+  const [form, setForm] = useState({ email: "", full_name: "", password: "", role: "officer", course: "", company_id: "", student_id: "" });
   const [secret, setSecret] = useState("");
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
@@ -19,6 +20,7 @@ export function AccessPage() {
     api<{ items: User[] }>("/api/users").then((payload) => setItems(payload.items));
     api<{ courses: Course[] }>("/api/meta").then((payload) => setCourses(payload.courses));
     api<{ items: Company[] }>("/api/companies").then((payload) => setCompanies(payload.items));
+    api<{ items: Student[] }>("/api/students?limit=100").then((payload) => setStudents(payload.items));
   }
   useEffect(() => { load(); }, []);
 
@@ -32,10 +34,10 @@ export function AccessPage() {
           ...form,
           course: form.role === "coordinator" ? form.course : null,
           company_id: form.role === "recruiter" ? form.company_id : null,
-          student_id: null,
+          student_id: form.role === "student" ? form.student_id : null,
         }),
       });
-      setMessage("Account created.");
+      setMessage(form.role === "student" ? `${form.email} can sign in with the password you set and will see only that record.` : "Account created.");
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not create the account");
@@ -59,7 +61,7 @@ export function AccessPage() {
                 <td>{account.full_name}</td>
                 <td>{account.email}</td>
                 <td>{account.role_label}</td>
-                <td>{account.course_name || account.company_id || "University"}</td>
+                <td>{account.role === "student" ? "Own record" : account.course_name || account.company_id || "University"}</td>
                 <td>
                   {account.id !== user?.id && (
                     <button
@@ -85,8 +87,8 @@ export function AccessPage() {
       <section className="grid split">
         <form className="card stack" onSubmit={create}>
           <h2>New account</h2>
-          <label>Name<input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} required /></label>
-          <label>Email<input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /></label>
+          <label>Name<input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} required readOnly={form.role === "student"} /></label>
+          <label>Email<input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required readOnly={form.role === "student"} /></label>
           <label>Password<input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} required /></label>
           <label>
             Role
@@ -94,6 +96,7 @@ export function AccessPage() {
               <option value="officer">Placement Officer</option>
               <option value="coordinator">Course Coordinator</option>
               <option value="recruiter">Company / Recruiter</option>
+              <option value="student">Student</option>
               <option value="admin">Placement Administrator</option>
             </select>
           </label>
@@ -103,6 +106,29 @@ export function AccessPage() {
               <select value={form.course} onChange={(event) => setForm({ ...form, course: event.target.value })} required>
                 <option value="">Select</option>
                 {courses.map((course) => <option key={course.code} value={course.code}>{course.name}</option>)}
+              </select>
+            </label>
+          )}
+          {form.role === "student" && (
+            <label>
+              Student record
+              <select
+                value={form.student_id}
+                required
+                onChange={(event) => {
+                  const student = students.find((item) => item.id === event.target.value);
+                  setForm({
+                    ...form,
+                    student_id: event.target.value,
+                    email: student?.email || "",
+                    full_name: student?.full_name || "",
+                  });
+                }}
+              >
+                <option value="">Select a record that has no sign-in</option>
+                {students.filter((student) => !items.some((account) => account.student_id === student.id)).map((student) => (
+                  <option key={student.id} value={student.id}>{student.full_name} · {student.placement_id}</option>
+                ))}
               </select>
             </label>
           )}
